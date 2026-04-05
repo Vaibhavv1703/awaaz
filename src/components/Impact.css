@@ -54,3 +54,37 @@
   color: var(--gold);
   margin-bottom: 1.5rem;
 }
+
+@media (max-width: 900px) {
+  .impact {
+    padding: 6rem 1.5rem;
+  }
+
+  .impact__quote {
+    padding-left: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .impact {
+    padding: 4.5rem 1rem;
+  }
+
+  .impact__quote {
+    font-size: clamp(1.1rem, 6vw, 1.65rem);
+    margin-bottom: 2rem;
+    line-height: 1.45;
+  }
+
+  .impact__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .impact__col {
+    padding: 1.35rem 1rem;
+  }
+
+  .impact__col-item {
+    font-size: 0.86rem;
+  }
+}

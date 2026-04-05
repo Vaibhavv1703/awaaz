@@ -167,3 +167,67 @@
   width: 1px; height: 40px;
   background: linear-gradient(to bottom, #888, transparent);
 }
+
+@media (max-width: 1024px) {
+  .hero {
+    padding: 7rem 1.5rem 3.5rem;
+  }
+
+  .hero__glow {
+    width: 480px;
+    height: 480px;
+  }
+
+  .hero__subtitle {
+    max-width: 620px;
+    font-size: 1rem;
+    margin-bottom: 2.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 6.2rem 1rem 3rem;
+  }
+
+  .hero__grid-bg {
+    background-size: 42px 42px;
+  }
+
+  .hero__glow {
+    width: 340px;
+    height: 340px;
+    top: 34%;
+  }
+
+  .hero__badge {
+    font-size: 0.62rem;
+    letter-spacing: 0.11em;
+    padding: 0.3rem 0.7rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .hero__title {
+    font-size: clamp(2.1rem, 12vw, 3.4rem);
+  }
+
+  .hero__subtitle {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .hero__mic {
+    width: 62px;
+    height: 62px;
+    font-size: 1.45rem;
+  }
+
+  .hero__scroll-hint {
+    position: static;
+    transform: none;
+    margin-top: 2rem;
+    opacity: 0.55;
+  }
+}

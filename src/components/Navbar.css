@@ -61,3 +61,32 @@
 }
 
 .navbar__cta:hover { opacity: 0.85; }
+
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 0.9rem 1.5rem;
+  }
+
+  .navbar__links {
+    gap: 1.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.8rem 1rem;
+  }
+
+  .navbar__brand {
+    font-size: 1.05rem;
+  }
+
+  .navbar__links {
+    display: none;
+  }
+
+  .navbar__cta {
+    font-size: 0.72rem;
+    padding: 0.5rem 0.9rem;
+  }
+}

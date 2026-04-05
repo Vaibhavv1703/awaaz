@@ -36,3 +36,33 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+
+@media (max-width: 1024px) {
+  .stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card:nth-child(odd) {
+    border-left: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .stats__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+    padding: 1.6rem 1rem;
+  }
+
+  .stat-card:last-child {
+    border-bottom: none;
+  }
+
+  .stat-card__label {
+    font-size: 0.78rem;
+  }
+}

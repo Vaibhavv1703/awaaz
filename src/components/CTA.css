@@ -35,3 +35,21 @@
 }
 
 .cta__btn:hover { opacity: 0.85; }
+
+@media (max-width: 768px) {
+  .cta {
+    padding: 4rem 1rem;
+  }
+
+  .cta__desc {
+    margin-bottom: 2rem;
+    font-size: 0.93rem;
+  }
+
+  .cta__btn {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.95rem 1.1rem;
+    font-size: 0.82rem;
+  }
+}
