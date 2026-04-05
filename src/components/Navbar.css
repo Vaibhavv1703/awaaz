@@ -1,0 +1,63 @@
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+}
+
+.navbar--scrolled {
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom-color: var(--border);
+}
+
+.navbar__logo { display: flex; align-items: center; gap: 0.7rem; }
+
+.navbar__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 12px var(--gold);
+  display: inline-block;
+}
+
+.navbar__brand {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+
+.navbar__links { display: flex; gap: 2.5rem; }
+
+.navbar__link {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.navbar__link:hover { color: var(--gold); }
+
+.navbar__cta {
+  font-size: 0.8rem;
+  padding: 0.55rem 1.4rem;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  border-radius: 2px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  font-family: var(--font-body);
+  transition: opacity 0.2s ease;
+}
+
+.navbar__cta:hover { opacity: 0.85; }

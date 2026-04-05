@@ -1,0 +1,56 @@
+.impact { padding: 8rem 2rem; }
+
+.impact__inner { max-width: 780px; margin: 0 auto; text-align: center; }
+
+.impact__quote {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  color: #ddd;
+  line-height: 1.5;
+  font-style: italic;
+  border-left: 3px solid var(--gold);
+  padding-left: 2rem;
+  text-align: left;
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.impact__quote--visible { opacity: 1; transform: translateY(0); }
+
+.impact__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+
+.impact__col { background: #0a0a0a; padding: 2rem; text-align: left; }
+
+.impact__col-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 1.2rem;
+}
+
+.impact__col--gold .impact__col-label { color: var(--gold); }
+
+.impact__col-item {
+  font-size: 0.9rem;
+  color: #555;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #141414;
+}
+
+.impact__col--gold .impact__col-item { color: #bbb; }
+
+.section-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}

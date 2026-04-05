@@ -1,0 +1,20 @@
+.footer {
+  padding: 2rem 2.5rem;
+  border-top: 1px solid #141414;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer__logo { display: flex; align-items: center; gap: 0.6rem; }
+
+.footer__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: inline-block;
+}
+
+.footer__brand { font-family: var(--font-display); font-size: 1rem; color: #fff; }
+
+.footer__tagline { font-size: 0.75rem; color: var(--text-faint); }
