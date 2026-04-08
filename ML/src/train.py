@@ -6,6 +6,7 @@ import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
 
 df = pd.read_csv("../dataset/clean/final.csv")
 le = LabelEncoder()
@@ -29,7 +30,7 @@ SENSITIVE = ['Gender', 'Property_Area', 'Income_Type', 'Accent_Level']
 model_biased = RandomForestClassifier(n_estimators=100)
 model_biased.fit(X_train, y_train)
 
-# Fair model (remove sensitive features)
+# Fair model
 X_train_fair = X_train.drop(columns=SENSITIVE)
 model_fair = LogisticRegression(max_iter=3000)
 sample_weights = df.apply(
@@ -41,6 +42,48 @@ sample_weights = df.apply(
     axis=1
 )
 model_fair.fit(X_train_fair, y_train, sample_weight=sample_weights.loc[X_train.index])
+
+param_grid_rf = {
+    "n_estimators": [100, 200],
+    "max_depth": [5, 10, None],
+    "min_samples_split": [2, 5],
+    "min_samples_leaf": [1, 2]
+}
+
+grid_rf = GridSearchCV(
+    RandomForestClassifier(random_state=42),
+    param_grid_rf,
+    cv=3,
+    scoring="accuracy",
+    n_jobs=-1
+)
+
+grid_rf.fit(X_train, y_train)
+model_biased = grid_rf.best_estimator_
+print("Best RF params:", grid_rf.best_params_)
+
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('lr', LogisticRegression(max_iter=5000))
+])
+
+param_grid_lr = {
+    "lr__C": [0.1, 1, 10],
+    "lr__class_weight": [None, "balanced"]
+}
+
+grid_lr = GridSearchCV(
+    pipeline,
+    param_grid_lr,
+    cv=3,
+    scoring="accuracy"
+)
+
+grid_lr.fit(X_train_fair, y_train)
+
+model_fair = grid_lr.best_estimator_
+
+print("Best LR params:", grid_lr.best_params_)
 
 joblib.dump(model_biased, "../models/biased.pkl")
 joblib.dump(model_fair, "../models/fair.pkl")

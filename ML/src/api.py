@@ -6,7 +6,6 @@ app = Flask(__name__)
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
     data = request.json
-
     result = evaluate_applicant(data)
 
     return jsonify(result)
