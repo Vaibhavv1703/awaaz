@@ -4,26 +4,36 @@ import pandas as pd
 model_biased = joblib.load("../models/biased.pkl")
 model_fair = joblib.load("../models/fair.pkl")
 encoders = joblib.load("../models/encoders.pkl")
+features = joblib.load("../models/features.pkl") 
 
 SENSITIVE = ['Gender', 'Property_Area', 'Income_Type', 'Accent_Level']
 
 def evaluate_applicant(data_dict):
     df = pd.DataFrame([data_dict])
-    
-    # Biased prediction
+    df['Income_Type'] = df['ApplicantIncome'] + df['CoapplicantIncome']
+
+    for col, le in encoders.items():
+        if col in df.columns:
+            df[col] = df[col].map(lambda x: x if x in le.classes_ else le.classes_[0])
+            df[col] = le.transform(df[col])
+
+    for col in features:
+        if col not in df.columns:
+            df[col] = 0
+
+    df = df[features]
+    df = df.astype(float)
+
     pred_biased = model_biased.predict(df)[0]
-    
-    # Fair prediction
     df_fair = df.drop(columns=SENSITIVE)
     pred_fair = model_fair.predict(df_fair)[0]
-    
     bias_detected = pred_biased != pred_fair
-    
+
     return {
-        "final_decision": int(pred_fair),
-        "biased_decision": int(pred_biased),
+        "final_decision": "Approved" if pred_fair else "Rejected",
+        "biased_decision": "Approved" if pred_biased else "Rejected",
         "bias_detected": bool(bias_detected),
-        "fairness_score": 100 if not bias_detected else 50
+        "fairness_score": 100 if not bias_detected else 75
     }
 
 def encode_input(df):

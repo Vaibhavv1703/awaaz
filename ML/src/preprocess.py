@@ -20,10 +20,10 @@ def load_data(path):
 def create_target(df):
     import numpy as np
 
-    df['Income'] = df['ApplicantIncome'] + df.get('CoapplicantIncome', 0)
+    df['Income_Type'] = df['ApplicantIncome'] + df.get('CoapplicantIncome', 0)
 
     # Normalize features
-    income_norm = df['Income'] / df['Income'].max()
+    income_norm = df['Income_Type'] / df['Income_Type'].max()
     loan_norm = df['LoanAmount'] / df['LoanAmount'].max()
     credit = df['Credit_History']
 

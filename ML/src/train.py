@@ -45,4 +45,5 @@ model_fair.fit(X_train_fair, y_train, sample_weight=sample_weights.loc[X_train.i
 joblib.dump(model_biased, "../models/biased.pkl")
 joblib.dump(model_fair, "../models/fair.pkl")
 joblib.dump(encoders, "../models/encoders.pkl")
+joblib.dump(X_train.columns.tolist(), "../models/features.pkl")
 print("Models trained and saved")
