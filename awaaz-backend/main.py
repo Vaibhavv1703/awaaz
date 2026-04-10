@@ -7,17 +7,13 @@ from google.oauth2 import service_account
 from groq import Groq
 import json
 import tempfile
+import base64
 
 load_dotenv()
 
-
-credentials_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
-if not credentials_json:
-    raise ValueError("Missing GOOGLE_CREDENTIALS_JSON")
+b64 = os.getenv("GOOGLE_CREDS_BASE64")
+credentials_json = base64.b64decode(b64).decode()
 credentials_info = json.loads(credentials_json)
-if isinstance(credentials_info, str):
-    credentials_info = json.loads(credentials_info)
-credentials_info["private_key"] = credentials_info["private_key"].replace("\\n", "\n")
 credentials = service_account.Credentials.from_service_account_info(credentials_info)
 client = speech.SpeechClient(credentials=credentials)
 
