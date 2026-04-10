@@ -15,6 +15,8 @@ credentials_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
 if not credentials_json:
     raise ValueError("Missing GOOGLE_CREDENTIALS_JSON")
 credentials_info = json.loads(credentials_json)
+if isinstance(credentials_info, str):
+    credentials_info = json.loads(credentials_info)
 credentials_info["private_key"] = credentials_info["private_key"].replace("\\n", "\n")
 credentials = service_account.Credentials.from_service_account_info(credentials_info)
 client = speech.SpeechClient(credentials=credentials)
