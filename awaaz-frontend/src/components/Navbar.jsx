@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { NAV_LINKS } from "../data";
 import "./Navbar.css";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -24,7 +26,7 @@ export default function Navbar() {
           </a>
         ))}
       </div>
-      <button className="navbar__cta">Try Demo</button>
+      <button className="navbar__cta" onClick={() => navigate("/demo")}>Try Demo</button>
     </nav>
   );
 }
