@@ -5,8 +5,18 @@ from dotenv import load_dotenv
 from google import genai
 from groq import Groq
 import json
+import tempfile
+import base64
 
 load_dotenv()
+
+
+credentials_b64 = os.getenv("GOOGLE_CREDENTIALS_BASE64")
+if credentials_b64:
+    credentials_json = base64.b64decode(credentials_b64).decode('utf-8')
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        f.write(credentials_json)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
 
 app = FastAPI()
 
