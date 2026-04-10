@@ -31,9 +31,11 @@ def root():
 
 @app.post("/api/transcribe")
 async def transcribe(file: UploadFile = File(...)):
+    print("✅ Request received")
     audio_data = await file.read()
 
     audio = speech.RecognitionAudio(content=audio_data)
+    print("📁 File read, size:", len(audio_data))
     config = speech.RecognitionConfig (
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=48000,
@@ -42,9 +44,9 @@ async def transcribe(file: UploadFile = File(...)):
         enable_automatic_punctuation=True,
         audio_channel_count=2,
     )
-
+    print("🚀 Calling Google Speech API...")
     response = client.recognize(config=config, audio=audio)
-
+    print("✅ Got response from Google")
     if not response.results:
         return { "transcript": "", "message": "Could not transcribe audio" }
 
