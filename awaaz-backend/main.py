@@ -21,8 +21,6 @@ client = speech.SpeechClient(credentials=credentials)
 
 app = FastAPI()
 
-client = speech.SpeechClient()
-
 gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
