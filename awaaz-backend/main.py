@@ -3,20 +3,21 @@ from fastapi import FastAPI, UploadFile, File
 from google.cloud import speech
 from dotenv import load_dotenv
 from google import genai
+from google.oauth2 import service_account
 from groq import Groq
 import json
 import tempfile
-import base64
 
 load_dotenv()
 
 
-credentials_b64 = os.getenv("GOOGLE_CREDENTIALS_BASE64")
-if credentials_b64:
-    credentials_json = base64.b64decode(credentials_b64).decode('utf-8')
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-        f.write(credentials_json)
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
+credentials_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
+if not credentials_json:
+    raise ValueError("Missing GOOGLE_CREDENTIALS_JSON")
+credentials_info = json.loads(credentials_json)
+credentials_info["private_key"] = credentials_info["private_key"].replace("\\n", "\n")
+credentials = service_account.Credentials.from_service_account_info(credentials_info)
+client = speech.SpeechClient(credentials=credentials)
 
 app = FastAPI()
 
