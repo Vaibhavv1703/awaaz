@@ -2,8 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Demo.css";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://awaaz-production.up.railway.app";
+const API_BASE_URL = "https://awaaz-production.up.railway.app";
 
 export default function Demo() {
   const [audioFile, setAudioFile] = useState(null);

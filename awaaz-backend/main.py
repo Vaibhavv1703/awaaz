@@ -25,7 +25,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://awaaz-production.up.railway.app",
+        "https://awaaz-dedsec.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -41,11 +41,11 @@ def root():
 
 @app.post("/api/transcribe")
 async def transcribe(file: UploadFile = File(...)):
-    print("✅ Request received")
+    print("Request received")
     audio_data = await file.read()
 
     audio = speech.RecognitionAudio(content=audio_data)
-    print("📁 File read, size:", len(audio_data))
+    print("File read, size:", len(audio_data))
     config = speech.RecognitionConfig (
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=48000,
@@ -54,14 +54,17 @@ async def transcribe(file: UploadFile = File(...)):
         enable_automatic_punctuation=True,
         audio_channel_count=2,
     )
-    print("🚀 Calling Google Speech API...")
+    print("Calling Google Speech API...")
     response = client.recognize(config=config, audio=audio)
-    print("✅ Got response from Google")
+    print("Got response from Google")
     if not response.results:
         return { "transcript": "", "message": "Could not transcribe audio" }
 
     transcript = response.results[0].alternatives[0].transcript
     confidence = response.results[0].alternatives[0].confidence
+
+    print("Transcript:", transcript)
+    print("Confidence:", confidence)
 
     # Map confidence to accent level
     if confidence >= 0.75:
