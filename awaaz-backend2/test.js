@@ -1,0 +1,1 @@
+import axios from 'axios'; axios.post('http://localhost:5000/api/audio/extract', {transcript: 'hello', accent_level: 'Medium'}).then(r => console.log('RESPONSE:', r.data)).catch(e => console.log('ERROR:', e.response?.data || e.message));
