@@ -53,8 +53,8 @@ const localExtract = (transcript, accent_level) => {
     };
 };
 
-// Use D: drive for temp files since C:\Windows\Temp may fill up
-const TEMP_DIR = 'D:\\tmp\\awaaz_audio';
+// Use OS temporary directory for cross-platform compatibility (Linux/Windows)
+const TEMP_DIR = path.join(os.tmpdir(), 'awaaz_audio');
 if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
 export const transcribe = async (req, res) => {
