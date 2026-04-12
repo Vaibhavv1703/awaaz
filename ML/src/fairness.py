@@ -9,20 +9,40 @@ SENSITIVE = ['Gender', 'Property_Area', 'Income_Type', 'Accent_Level']
 
 def evaluate_applicant(data_dict):
     df = pd.DataFrame([data_dict])
-    
-    # Biased prediction
-    pred_biased = model_biased.predict(df)[0]
-    
-    # Fair prediction
-    df_fair = df.drop(columns=SENSITIVE)
+
+    # Add derived feature used during training
+    df['Income'] = pd.to_numeric(df['ApplicantIncome'], errors='coerce').fillna(0) + \
+                   pd.to_numeric(df['CoapplicantIncome'], errors='coerce').fillna(0)
+
+    # Encode categorical columns using saved LabelEncoders
+    for col, le in encoders.items():
+        if col in df.columns:
+            val = str(df[col].iloc[0])
+            if val in le.classes_:
+                df[col] = le.transform([val])
+            else:
+                df[col] = le.transform([le.classes_[0]])
+
+    # Convert everything to numeric
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+
+    # Reorder columns to exactly match training order
+    biased_cols = list(model_biased.feature_names_in_)
+    df_biased = df.reindex(columns=biased_cols, fill_value=0)
+    pred_biased = model_biased.predict(df_biased)[0]
+
+    # Fair model: reorder to fair model's feature order
+    fair_cols = list(model_fair.feature_names_in_)
+    df_fair = df.reindex(columns=fair_cols, fill_value=0)
     pred_fair = model_fair.predict(df_fair)[0]
-    
-    bias_detected = pred_biased != pred_fair
-    
+
+    bias_detected = bool(pred_biased != pred_fair)
+
     return {
         "final_decision": int(pred_fair),
         "biased_decision": int(pred_biased),
-        "bias_detected": bool(bias_detected),
+        "bias_detected": bias_detected,
         "fairness_score": 100 if not bias_detected else 50
     }
 

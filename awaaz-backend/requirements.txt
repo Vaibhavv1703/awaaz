@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-python-multipart
-google-cloud-speech
-python-dotenv
-google-genai
-groq
