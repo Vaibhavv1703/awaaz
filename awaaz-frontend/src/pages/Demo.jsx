@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./Demo.css";
 
-const API_BASE_URL = "https://awaaz-production.up.railway.app";
+const API_BASE_URL = "http://localhost:5000"; // Temporarily overridden for local testing
 
 export default function Demo() {
   const [audioFile, setAudioFile] = useState(null);
@@ -12,6 +12,11 @@ export default function Demo() {
   const [extracted, setExtracted] = useState(null);
   const [loadingStep, setLoadingStep] = useState("");
   const [error, setError] = useState("");
+
+  const [sttProvider, setSttProvider] = useState("whisper");
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   const canTranscribe = useMemo(() => !!audioFile && !loadingStep, [audioFile, loadingStep]);
   const canExtract = useMemo(
@@ -29,6 +34,44 @@ export default function Demo() {
     setExtracted(null);
   };
 
+  const handleStartRecording = async () => {
+    setError("");
+    setAudioFile(null);
+    setTranscript("");
+    setExtracted(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const file = new File([audioBlob], "recording.webm", { type: "audio/webm" });
+        setAudioFile(file);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      setError("Microphone access denied or unavailable.");
+    }
+  };
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
+    }
+  };
+
   const handleTranscribe = async () => {
     if (!audioFile) return;
 
@@ -38,6 +81,7 @@ export default function Demo() {
 
       const formData = new FormData();
       formData.append("file", audioFile);
+      formData.append("sttProvider", sttProvider);
 
       const response = await fetch(`${API_BASE_URL}/api/transcribe`, {
         method: "POST",
@@ -96,10 +140,31 @@ export default function Demo() {
         </p>
 
         <div className="demo-controls">
-          <label htmlFor="audio-upload" className="demo-label">
-            Upload audio file
-          </label>
-          <input id="audio-upload" type="file" accept="audio/*" onChange={handleFileChange} className="demo-file" />
+          <div className="demo-provider-toggle">
+            <span className="demo-label">STT Provider:</span>
+            <label className="demo-radio">
+              <input type="radio" value="whisper" checked={sttProvider === 'whisper'} onChange={(e) => setSttProvider(e.target.value)} /> Groq Whisper
+            </label>
+            <label className="demo-radio">
+              <input type="radio" value="google" checked={sttProvider === 'google'} onChange={(e) => setSttProvider(e.target.value)} /> Google Cloud STT
+            </label>
+          </div>
+
+          <div className="demo-input-group">
+            <label htmlFor="audio-upload" className="demo-label">Upload audio file</label>
+            <input id="audio-upload" type="file" accept="audio/*" onChange={handleFileChange} className="demo-file" disabled={isRecording} />
+          </div>
+          
+          <div className="demo-record-controls">
+            {isRecording ? (
+              <button className="demo-btn demo-btn--danger" onClick={handleStopRecording}>⏹ Stop Recording</button>
+            ) : (
+              <button className="demo-btn demo-btn--ghost" onClick={handleStartRecording}>🎙 Record Voice</button>
+            )}
+            {audioFile && audioFile.name === "recording.webm" && !isRecording && (
+                <span className="demo-meta" style={{marginLeft: '10px'}}>Recording attached!</span>
+            )}
+          </div>
 
           <div className="demo-actions">
             <button onClick={handleTranscribe} disabled={!canTranscribe} className="demo-btn">
