@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import Application from '../models/Application.js';
+import speech from '@google-cloud/speech';
 
 // Setup Groq client (used for both transcription AND extraction)
 const getGroqClient = () => {
@@ -12,6 +13,19 @@ const getGroqClient = () => {
         console.warn("WARNING: GROQ_API_KEY is not set properly.");
     }
     return new Groq({ apiKey: key || 'dummy_key_to_prevent_startup_crash' });
+};
+
+// Setup Google Speech client
+const getGoogleSpeechClient = () => {
+    let credentials;
+    if (process.env.GOOGLE_CREDS_BASE64) {
+        try {
+            credentials = JSON.parse(Buffer.from(process.env.GOOGLE_CREDS_BASE64.trim(), 'base64').toString('utf8'));
+        } catch (e) {
+            console.error("Failed to parse GOOGLE_CREDS_BASE64", e);
+        }
+    }
+    return new speech.SpeechClient(credentials ? { credentials } : undefined);
 };
 
 // Local fallback extractor using regex — runs when Groq quota is exceeded
@@ -50,6 +64,8 @@ export const transcribe = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
+        const sttProvider = req.body.sttProvider || 'whisper'; // 'whisper' or 'google'
+
         const mimeType = req.file.mimetype || 'audio/webm';
         let ext = 'webm';
         if (mimeType.includes('ogg')) ext = 'ogg';
@@ -59,23 +75,56 @@ export const transcribe = async (req, res) => {
 
         tempFileInput = path.join(TEMP_DIR, `input-${Date.now()}.${ext}`);
         fs.writeFileSync(tempFileInput, req.file.buffer);
-        console.log(`[Transcribe] MIME: ${mimeType}, ext: .${ext}, size: ${req.file.buffer.length} bytes`);
+        console.log(`[Transcribe] Provider: ${sttProvider}, MIME: ${mimeType}, ext: .${ext}, size: ${req.file.buffer.length} bytes`);
 
-        const groq = getGroqClient();
-        const transcription = await groq.audio.transcriptions.create({
-            file: fs.createReadStream(tempFileInput),
-            model: "whisper-large-v3-turbo",
-            response_format: "json",
-            language: "en",
-            temperature: 0.0,
-        });
+        let transcript = "";
+        let confidence = 0.85;
 
-        if (!transcription || !transcription.text) {
-            return res.status(200).json({ transcript: "", message: "Could not transcribe audio" });
+        if (sttProvider === 'google') {
+            const client = getGoogleSpeechClient();
+            // Defaulting config to WEBM_OPUS at 48000Hz (common for browser MediaRecorder)
+            const config = {
+                encoding: ext === 'webm' ? 'WEBM_OPUS' : undefined,
+                sampleRateHertz: ext === 'webm' ? 48000 : undefined,
+                languageCode: 'en-US',
+                enableAutomaticPunctuation: true,
+            };
+            const request = {
+                audio: { content: req.file.buffer.toString('base64') },
+                config: config,
+            };
+
+            const [response] = await client.recognize(request);
+            if (response && response.results) {
+                transcript = response.results
+                    .map(result => result.alternatives[0].transcript)
+                    .join('\n');
+                
+                // If the top phrase has a confidence, use it
+                if (response.results[0] && response.results[0].alternatives[0] && typeof response.results[0].alternatives[0].confidence === 'number') {
+                    confidence = response.results[0].alternatives[0].confidence;
+                }
+            } else {
+                return res.status(200).json({ transcript: "", message: "Empty speech response from Google" });
+            }
+
+        } else {
+            // Whisper flow
+            const groq = getGroqClient();
+            const transcription = await groq.audio.transcriptions.create({
+                file: fs.createReadStream(tempFileInput),
+                model: "whisper-large-v3-turbo",
+                response_format: "json",
+                language: "en",
+                temperature: 0.0,
+            });
+
+            if (!transcription || !transcription.text) {
+                return res.status(200).json({ transcript: "", message: "Could not transcribe audio" });
+            }
+            transcript = transcription.text;
         }
 
-        const transcript = transcription.text;
-        const confidence = 0.85;
         const accent_level = confidence >= 0.75 ? "Low" : confidence >= 0.50 ? "Medium" : "High";
 
         res.status(200).json({ transcript, confidence: Math.round(confidence * 100) / 100, accent_level });
