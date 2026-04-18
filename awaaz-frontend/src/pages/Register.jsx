@@ -18,7 +18,7 @@ export default function Register() {
             return;
         }
         try {
-            const { data } = await axios.post('http://localhost:5000/api/auth/register', { email, password });
+            const { data } = await axios.post('https://awaaz-backend2.onrender.com/api/auth/register', { email, password });
             localStorage.setItem('userInfo', JSON.stringify(data));
             navigate('/dashboard');
         } catch (err) {
