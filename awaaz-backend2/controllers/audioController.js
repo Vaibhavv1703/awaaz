@@ -212,7 +212,13 @@ Return exactly this JSON structure (fill in your best guess for anything not men
 
 export const evaluate = async (req, res) => {
     try {
-        const inputData = req.body;
+        const inputData = { ...req.body };
+        
+        // Scale down LoanAmount if user entered the exact amount (e.g. 150000 instead of 150)
+        // The ML model was trained on LoanAmount in thousands.
+        if (inputData.LoanAmount && inputData.LoanAmount > 1000) {
+            inputData.LoanAmount = inputData.LoanAmount / 1000;
+        }
 
         const pythonResponse = await axios.post(process.env.PYTHON_ML_URL || 'http://localhost:8000/evaluate', inputData);
 
