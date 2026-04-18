@@ -127,7 +127,7 @@ export default function Apply() {
             const ext = mimeType.includes('ogg') ? 'ogg' : mimeType.includes('mp4') ? 'mp4' : 'webm';
             formDataFile.append('file', blob, `audio.${ext}`);
             
-            const transResponse = await axios.post('http://localhost:5000/api/audio/transcribe', formDataFile, {
+            const transResponse = await axios.post('https://awaaz-backend2.onrender.com/api/audio/transcribe', formDataFile, {
                 ...config,
                 headers: { ...config.headers, 'Content-Type': 'multipart/form-data' }
             });
@@ -141,7 +141,7 @@ export default function Apply() {
             setTranscript(transResponse.data.transcript);
             setAccentLevel(transResponse.data.accent_level);
 
-            const extractResponse = await axios.post('http://localhost:5000/api/audio/extract', {
+            const extractResponse = await axios.post('https://awaaz-backend2.onrender.com/api/audio/extract', {
                 transcript: transResponse.data.transcript,
                 accent_level: transResponse.data.accent_level
             }, config);
@@ -168,7 +168,7 @@ export default function Apply() {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         
         try {
-            const { data } = await axios.post('http://localhost:5000/api/audio/evaluate', formData, config);
+            const { data } = await axios.post('https://awaaz-backend2.onrender.com/api/audio/evaluate', formData, config);
             setEvaluationResult(data.evaluation_result);
             setStep(4);
             

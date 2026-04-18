@@ -2,7 +2,7 @@ import { useMemo, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./Demo.css";
 
-const API_BASE_URL = "http://localhost:5000"; // Temporarily overridden for local testing
+const API_BASE_URL = "https://awaaz-backend2.onrender.com"; // Temporarily overridden for local testing
 
 export default function Demo() {
   const [audioFile, setAudioFile] = useState(null);
