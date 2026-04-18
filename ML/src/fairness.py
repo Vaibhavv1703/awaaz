@@ -1,9 +1,12 @@
 import joblib
 import pandas as pd
+from pathlib import Path
 
-model_biased = joblib.load("../models/biased.pkl")
-model_fair = joblib.load("../models/fair.pkl")
-encoders = joblib.load("../models/encoders.pkl")
+MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+
+model_biased = joblib.load(MODELS_DIR / "biased.pkl")
+model_fair = joblib.load(MODELS_DIR / "fair.pkl")
+encoders = joblib.load(MODELS_DIR / "encoders.pkl")
 
 SENSITIVE = ['Gender', 'Property_Area', 'Income_Type', 'Accent_Level']
 
