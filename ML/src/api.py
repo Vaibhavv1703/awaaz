@@ -1,6 +1,10 @@
 from fastapi import FastAPI
-from fairness import evaluate_applicant
 import uvicorn
+
+try:
+    from .fairness import evaluate_applicant
+except ImportError:
+    from fairness import evaluate_applicant
 
 app = FastAPI()
 
