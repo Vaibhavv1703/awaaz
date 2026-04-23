@@ -87,6 +87,7 @@ export const transcribe = async (req, res) => {
                 encoding: ext === 'webm' ? 'WEBM_OPUS' : undefined,
                 sampleRateHertz: ext === 'webm' ? 48000 : undefined,
                 languageCode: 'en-US',
+                alternativeLanguageCodes: ['hi-IN', 'bn-IN', 'en-IN'],
                 enableAutomaticPunctuation: true,
             };
             const request = {
@@ -109,13 +110,12 @@ export const transcribe = async (req, res) => {
             }
 
         } else {
-            // Whisper flow
+            // Whisper flow: use translations to auto-detect any language and translate to English
             const groq = getGroqClient();
-            const transcription = await groq.audio.transcriptions.create({
+            const transcription = await groq.audio.translations.create({
                 file: fs.createReadStream(tempFileInput),
-                model: "whisper-large-v3-turbo",
+                model: "whisper-large-v3",
                 response_format: "json",
-                language: "en",
                 temperature: 0.0,
             });
 
@@ -220,7 +220,12 @@ export const evaluate = async (req, res) => {
             inputData.LoanAmount = inputData.LoanAmount / 1000;
         }
 
-        const pythonResponse = await axios.post(process.env.PYTHON_ML_URL || 'http://localhost:8000/evaluate', inputData);
+        const mlUrl = process.env.PYTHON_ML_URL || 'http://localhost:8000/evaluate';
+        if (mlUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+            console.warn(`WARNING: Evaluate endpoint is using ${mlUrl} in production. Please set PYTHON_ML_URL in your environment variables to point to your deployed ML service.`);
+        }
+
+        const pythonResponse = await axios.post(mlUrl, inputData);
 
         const parsedDecision = (decision) => decision === 1 ? "Approved" : "Rejected";
 
