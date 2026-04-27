@@ -151,7 +151,6 @@ export default function Apply() {
             const { data } = await axios.post('https://awaaz-backend2.onrender.com/api/audio/evaluate', formData, config);
             setEvaluationResult(data.evaluation_result);
             setStep(4);
-
         } catch (error) {
             console.error(error);
             alert("Error evaluating the application.");
