@@ -1,52 +1,39 @@
 import joblib
 import pandas as pd
-from pathlib import Path
 
-MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
-
-model_biased = joblib.load(MODELS_DIR / "biased.pkl")
-model_fair = joblib.load(MODELS_DIR / "fair.pkl")
-encoders = joblib.load(MODELS_DIR / "encoders.pkl")
+model_biased = joblib.load("../models/biased.pkl")
+model_fair = joblib.load("../models/fair.pkl")
+encoders = joblib.load("../models/encoders.pkl")
+features = joblib.load("../models/features.pkl") 
 
 SENSITIVE = ['Gender', 'Property_Area', 'Income_Type', 'Accent_Level']
 
 def evaluate_applicant(data_dict):
     df = pd.DataFrame([data_dict])
+    df['Income_Type'] = df['ApplicantIncome'] + df['CoapplicantIncome']
 
-    # Add derived feature used during training
-    df['Income'] = pd.to_numeric(df['ApplicantIncome'], errors='coerce').fillna(0) + \
-                   pd.to_numeric(df['CoapplicantIncome'], errors='coerce').fillna(0)
-
-    # Encode categorical columns using saved LabelEncoders
     for col, le in encoders.items():
         if col in df.columns:
-            val = str(df[col].iloc[0])
-            if val in le.classes_:
-                df[col] = le.transform([val])
-            else:
-                df[col] = le.transform([le.classes_[0]])
+            df[col] = df[col].map(lambda x: x if x in le.classes_ else le.classes_[0])
+            df[col] = le.transform(df[col])
 
-    # Convert everything to numeric
-    for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+    for col in features:
+        if col not in df.columns:
+            df[col] = 0
 
-    # Reorder columns to exactly match training order
-    biased_cols = list(model_biased.feature_names_in_)
-    df_biased = df.reindex(columns=biased_cols, fill_value=0)
-    pred_biased = model_biased.predict(df_biased)[0]
+    df = df[features]
+    df = df.astype(float)
 
-    # Fair model: reorder to fair model's feature order
-    fair_cols = list(model_fair.feature_names_in_)
-    df_fair = df.reindex(columns=fair_cols, fill_value=0)
+    pred_biased = model_biased.predict(df)[0]
+    df_fair = df.drop(columns=SENSITIVE)
     pred_fair = model_fair.predict(df_fair)[0]
-
-    bias_detected = bool(pred_biased != pred_fair)
+    bias_detected = pred_biased != pred_fair
 
     return {
-        "final_decision": int(pred_fair),
-        "biased_decision": int(pred_biased),
-        "bias_detected": bias_detected,
-        "fairness_score": 100 if not bias_detected else 50
+        "final_decision": "Approved" if pred_fair else "Rejected",
+        "biased_decision": "Approved" if pred_biased else "Rejected",
+        "bias_detected": bool(bias_detected),
+        "fairness_score": 100 if not bias_detected else 75
     }
 
 def encode_input(df):
@@ -108,4 +95,3 @@ def generate_fairness_report(df):
 def overall_fairness_score(report):
     improvements = [v['improvement'] for v in report.values()]
     return sum(improvements) / len(improvements)
-
