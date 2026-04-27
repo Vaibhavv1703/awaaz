@@ -4,20 +4,6 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import '../components/Hero.css';
 
-// --- TTS Helper Function ---
-const speak = (text) => {
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    // Optional: You can change voice, pitch, and rate here
-    utterance.rate = 1.0; 
-    utterance.pitch = 1.0;
-    window.speechSynthesis.cancel(); // Stop any currently playing audio
-    window.speechSynthesis.speak(utterance);
-  } else {
-    console.warn("Browser does not support Speech Synthesis");
-  }
-};
-
 function Waveform({ active }) {
   return (
     <div className="waveform">
@@ -62,9 +48,7 @@ export default function Apply() {
         if (!userInfo) {
             navigate('/login');
         }
-        
-        // Initial Voice Greeting when user opens the Apply page
-        speak("Welcome to the Awaaz application process. Click the microphone to start recording your details.");
+
     }, [navigate]);
 
     const startRecording = async () => {
@@ -148,14 +132,10 @@ export default function Apply() {
 
             setFormData({ ...extractResponse.data, Accent_Level: transResponse.data.accent_level });
             setStep(3);
-            
-            // Speak confirmation once extraction is done
-            speak("Thank you. I have extracted your information. Please review the details on screen.");
 
         } catch (error) {
             console.error(error);
             alert("Error processing audio. Please try again.");
-            speak("I'm sorry, there was a problem processing your audio. Please try again.");
             setStep(1);
         }
     };
@@ -171,17 +151,10 @@ export default function Apply() {
             const { data } = await axios.post('https://awaaz-backend2.onrender.com/api/audio/evaluate', formData, config);
             setEvaluationResult(data.evaluation_result);
             setStep(4);
-            
-            // Speak final result to user
-            const resultMsg = data.evaluation_result.final_decision === "Approved" 
-                ? "Congratulations! Your loan application has been approved." 
-                : "I am sorry, but your loan application was rejected at this time.";
-            speak(resultMsg + " " + data.evaluation_result.message);
-            
+
         } catch (error) {
             console.error(error);
             alert("Error evaluating the application.");
-            speak("I encountered an error evaluating your application.");
             setStep(3);
         }
     };
