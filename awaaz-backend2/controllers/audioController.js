@@ -150,7 +150,7 @@ export const extract = async (req, res) => {
 
 Transcript: "${transcript}"
 
-Return exactly this JSON structure (fill in your best guess for anything not mentioned):
+Return exactly this JSON structure (fill in your NOT DEFINED for anything not mentioned):
 {
     "Gender": "Male or Female",
     "Married": "Yes or No",
