@@ -1,4 +1,3 @@
 Frontend: https://awaaz-dedsec.vercel.app/
-Backend: https://awaaz-production.up.railway.app/
-
-Both working perfectly as of now
+Backend: https://awaaz-backend2.onrender.com/
+ML Backend: https://awaaz-ml-api.onrender.com/
