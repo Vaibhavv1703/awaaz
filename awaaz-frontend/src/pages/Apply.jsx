@@ -151,12 +151,6 @@ export default function Apply() {
             const { data } = await axios.post('https://awaaz-backend2.onrender.com/api/audio/evaluate', formData, config);
             setEvaluationResult(data.evaluation_result);
             setStep(4);
-            
-            // Speak final result to user
-            const resultMsg = data.evaluation_result.final_decision === "Approved" 
-                ? "Congratulations! Your loan application has been approved." 
-                : "I am sorry, but your loan application was rejected at this time.";
-            
         } catch (error) {
             console.error(error);
             alert("Error evaluating the application.");
